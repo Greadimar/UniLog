@@ -125,6 +125,7 @@ void UniLog::setupTeOutput(QTextEdit *te, bool htmlSupport, bool addTimeStamp, b
                 QString out = note.msg;
                 if (addCategorySuffix) out.prepend(note.category+ "; ");
                 if (addTimeStamp) out.prepend(note.timestamp + ": ");
+//                if (htmlSupport) out = Qt::convertFromPlainText(out);
                 te->append(out);});
     };
     QWriteLocker locker(&rwMutex);

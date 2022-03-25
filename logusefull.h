@@ -29,10 +29,10 @@ inline QString hexString(uint hex, QString suffix = "0x")
     tempStr.prepend(suffix);
     return tempStr;
 }
-inline QString curTime(const QString& format = "hh-mm-ss:zzz"){
+inline QString curTime(const QString& format = "hh:mm:ss.zzz"){
     return QTime::currentTime().toString(format);
 }
-inline QString curDateTime(const QString& format = "yy-MM-dd_hh-mm-ss"){
+inline QString curDateTime(const QString& format = "yy.MM.dd hh:mm:ss"){
     return QDateTime::currentDateTime().toString(format);
 }
 }

@@ -95,9 +95,10 @@ public:
         return *this;
     }
     inline UniLogInterception &operator<<(UniHtml mt) {
-        if(hasHtml)
-            *this << optHtml.htmlEnd;
-        *this << mt.htmlBegin;
+//        if(hasHtml)
+//            *this << optHtml.htmlEnd;
+//        *this << mt.htmlBegin;
+        optHtml = mt;
         return *this;
     }
     template <typename T>
