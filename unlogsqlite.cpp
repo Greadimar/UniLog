@@ -7,10 +7,8 @@
 #include <QtSql/QSqlResult>
 #include <QTime>
 #include <QMetaEnum>
-#include "../debugtools.h"
 using namespace UniLogSqlite;
 using namespace LogTools;
-using namespace DebugTools;
 void SqliteLogger::startDb()
 {
     db = QSqlDatabase::addDatabase("QSQLITE", "UniLogDb");

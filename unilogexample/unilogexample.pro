@@ -9,10 +9,12 @@ CONFIG += c++11
 
 SOURCES += \
     main.cpp \
-    widget.cpp
+    widget.cpp \
+    unilogexample.cpp
 
 HEADERS += \
-    widget.h
+    widget.h \
+    unilogexample.h
 
 FORMS += \
     widget.ui

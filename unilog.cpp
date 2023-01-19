@@ -6,7 +6,7 @@
 
 #include <QString>
 #include <QWriteLocker>
-#include "../functiontools/posttothread.h"
+
 
 using namespace UniLogSqlite;
 QMap<LogTools::MsgType, QColor> UniLogPalette::fontLightColor{
@@ -50,7 +50,7 @@ void UniLog::setupSqlOutputOnce(QObject *context, UniLog::BlockFilter ignoreFilt
     QMetaObject::invokeMethod(sqlLogger, &SqliteLogger::startDb, Qt::QueuedConnection);
     auto msgReciever = [=](const LogTools::MsgNote& note){
         if (!ignoreFilter.isIgnored(note.category) && !ignoreFilter.isIgnored(note.type))
-            FunctionTools::postToThread(sqlLoggerThread, [=](){sqlLogger->gotLog(note);});
+            QMetaObject::invokeMethod(sqlLoggerThread, [=](){sqlLogger->gotLog(note);});
     };
     QWriteLocker locker(&rwMutex);
     logOutputs << LogOutput{sqlLogger, msgReciever, ignoreFilter, false, sqlLoggerThread};
@@ -68,7 +68,7 @@ void UniLog::setupQIODeviceOutput(QIODevice *qioDevice, bool htmlSupport, bool a
     QTextStream(qioDevice) << bodyStyleString;
     reciever = [=](const LogTools::MsgNote& note){
         if (!ignoreFilter.isIgnored(note.category) && !ignoreFilter.isIgnored(note.type))
-            FunctionTools::postToThread(threadForOutput, [=](){
+            QMetaObject::invokeMethod(threadForOutput, [=](){
                 //TODO: check for proper pattern
                 QString optCat = addCategerySuffix? note.category + "; ": "";
                 QTextStream(qioDevice) << note.timestamp << ": " << optCat << note.msg;
@@ -90,11 +90,11 @@ void UniLog::setupPteOutput(QPointer<QPlainTextEdit> pte, bool htmlSupport, bool
 #include <QCoreApplication>
 void UniLog::setupPteOutput(QPointer<QPlainTextEdit> pte, bool htmlSupport, bool addTimeStamp, bool addCategorySuffix, const BlockFilter &ignoreFilter, QThread *threadForOutput, const QString &bodyStyleString)
 {
-    if (!bodyStyleString.isEmpty()) FunctionTools::postToThread(threadForOutput, [=](){pte->appendHtml(bodyStyleString);});
+    if (!bodyStyleString.isEmpty())  QMetaObject::invokeMethod(threadForOutput, [=](){pte->appendHtml(bodyStyleString);});
     LogReciever reciever;
     reciever = [=](const LogTools::MsgNote& note){
         if (!ignoreFilter.isIgnored(note.category) && !ignoreFilter.isIgnored(note.type))
-            FunctionTools::postToThread(threadForOutput, [=](){
+            QMetaObject::invokeMethod(threadForOutput, [=](){
 
                 QString out = note.msg;
                 if (addCategorySuffix) out.prepend(note.category+ "; ");
@@ -119,11 +119,11 @@ void UniLog::setupTeOutput(QPointer<QTextEdit> te, bool htmlSupport, bool addTim
 
 void UniLog::setupTeOutput(QPointer<QTextEdit> te, bool htmlSupport, bool addTimeStamp, bool addCategorySuffix, const BlockFilter &ignoreFilter, QThread *threadForOutput, const QString &bodyStyleString)
 {
-    if (!bodyStyleString.isEmpty()) FunctionTools::postToThread(threadForOutput, [=](){te->append(bodyStyleString);});
+    if (!bodyStyleString.isEmpty())  QMetaObject::invokeMethod(threadForOutput, [=](){te->append(bodyStyleString);});
     LogReciever reciever;
     reciever = [=](const LogTools::MsgNote& note){
         if (!ignoreFilter.isIgnored(note.category) && !ignoreFilter.isIgnored(note.type))
-            FunctionTools::postToThread(threadForOutput, [=](){
+             QMetaObject::invokeMethod(threadForOutput, [=](){
                 QString out = note.msg;
                 if (addCategorySuffix) out.prepend(note.category+ "; ");
                 if (addTimeStamp) out.prepend(note.timestamp + ": ");
@@ -146,7 +146,7 @@ void UniLog::setupTsOutput(QTextStream *ts, bool htmlSupport, bool addTimeStamp,
     *ts << bodyStyleString;
     reciever = [=](const LogTools::MsgNote& note){
         if (!ignoreFilter.isIgnored(note.category) && !ignoreFilter.isIgnored(note.type))
-            FunctionTools::postToThread(threadForOutput, [=](){
+             QMetaObject::invokeMethod(threadForOutput, [=](){
                 //TODO check for proper pattern
                 QString optTime = addTimeStamp? note.timestamp + ": " : "";
                 QString optCat = addCategorySuffix? note.category + "; ": "";
@@ -163,7 +163,7 @@ void UniLog::setupCustomOutput(std::function<void(const LogTools::MsgNote &)> rc
     LogReciever reciever;
     reciever = [=](const LogTools::MsgNote& note){
         if (!ignoreFilter.isIgnored(note.category) && !ignoreFilter.isIgnored(note.type))
-            FunctionTools::postToThread(threadForOutput, [=](){rcvr(note);});
+             QMetaObject::invokeMethod(threadForOutput, [=](){rcvr(note);});
     };
     logOutputs << LogOutput{nullptr, reciever, ignoreFilter, htmlSupport, threadForOutput};
 }

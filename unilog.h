@@ -20,7 +20,7 @@
 #include <QHash>
 #include <tuple>
 #include <QReadWriteLock>
-#include "../hashtools/hashtools.h"
+
 
 struct UniLogPalette{
     static QMap<LogTools::MsgType, QColor> fontLightColor;
