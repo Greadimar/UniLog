@@ -15,14 +15,14 @@ QMap<LogTools::MsgType, QColor> UniLogPalette::fontLightColor{
     {LogTools::MsgType::warning, QColor("#c65102")},
     {LogTools::MsgType::valid, QColor(Qt::darkGreen)},
     {LogTools::MsgType::critical, QColor(Qt::red)}
-    };
+};
 QMap<LogTools::MsgType, QColor> UniLogPalette::fontDarkColor{
-            {LogTools::MsgType::info, QColor(Qt::cyan)},
-            {LogTools::MsgType::debug, QColor(Qt::white)},
-            {LogTools::MsgType::warning, QColor(Qt::yellow)},
-            {LogTools::MsgType::valid, QColor(Qt::green)},
-            {LogTools::MsgType::critical, QColor(Qt::red)}
-    };
+    {LogTools::MsgType::info, QColor(Qt::cyan)},
+    {LogTools::MsgType::debug, QColor(Qt::white)},
+    {LogTools::MsgType::warning, QColor(Qt::yellow)},
+    {LogTools::MsgType::valid, QColor(Qt::green)},
+    {LogTools::MsgType::critical, QColor(Qt::red)}
+};
 QMap<LogTools::MsgType, QColor>* UniLogPalette::fontColor = &fontLightColor;
 void UniLogPalette::changeToDarkMode(){
     fontColor = &fontDarkColor;
@@ -78,26 +78,28 @@ void UniLog::setupQIODeviceOutput(QIODevice *qioDevice, bool htmlSupport, bool a
     logOutputs << LogOutput{qioDevice, reciever, ignoreFilter, htmlSupport, threadForOutput};
 }
 
-void UniLog::setupPteOutput(QPlainTextEdit *pte, bool htmlSupport, const BlockFilter &ignoreFilter, QThread *threadForOutput, const QString& bodyStyleString)
+void UniLog::setupPteOutput(QPointer<QPlainTextEdit> pte, bool htmlSupport, const BlockFilter &ignoreFilter, QThread *threadForOutput, const QString& bodyStyleString)
 {
     setupPteOutput(pte, htmlSupport, false, ignoreFilter, threadForOutput, bodyStyleString);
 }
 
-void UniLog::setupPteOutput(QPlainTextEdit *pte, bool htmlSupport, bool addTimeStamp, const BlockFilter &ignoreFilter, QThread *threadForOutput, const QString& bodyStyleString)
+void UniLog::setupPteOutput(QPointer<QPlainTextEdit> pte, bool htmlSupport, bool addTimeStamp, const BlockFilter &ignoreFilter, QThread *threadForOutput, const QString& bodyStyleString)
 {
     setupPteOutput(pte, htmlSupport, addTimeStamp, false, ignoreFilter, threadForOutput, bodyStyleString);
 }
-
-void UniLog::setupPteOutput(QPlainTextEdit *pte, bool htmlSupport, bool addTimeStamp, bool addCategorySuffix, const BlockFilter &ignoreFilter, QThread *threadForOutput, const QString &bodyStyleString)
+#include <QCoreApplication>
+void UniLog::setupPteOutput(QPointer<QPlainTextEdit> pte, bool htmlSupport, bool addTimeStamp, bool addCategorySuffix, const BlockFilter &ignoreFilter, QThread *threadForOutput, const QString &bodyStyleString)
 {
     if (!bodyStyleString.isEmpty()) FunctionTools::postToThread(threadForOutput, [=](){pte->appendHtml(bodyStyleString);});
     LogReciever reciever;
     reciever = [=](const LogTools::MsgNote& note){
         if (!ignoreFilter.isIgnored(note.category) && !ignoreFilter.isIgnored(note.type))
             FunctionTools::postToThread(threadForOutput, [=](){
+
                 QString out = note.msg;
                 if (addCategorySuffix) out.prepend(note.category+ "; ");
                 if (addTimeStamp) out.prepend(note.timestamp + ": ");
+                if (!pte) return;
                 pte->appendHtml(out);
             });
     };
@@ -106,16 +108,16 @@ void UniLog::setupPteOutput(QPlainTextEdit *pte, bool htmlSupport, bool addTimeS
 
 }
 
-void UniLog::setupTeOutput(QTextEdit *te, bool htmlSupport, const BlockFilter &ignoreFilter, QThread *threadForOutput, const QString& bodyStyleString)
+void UniLog::setupTeOutput(QPointer<QTextEdit> te, bool htmlSupport, const BlockFilter &ignoreFilter, QThread *threadForOutput, const QString& bodyStyleString)
 {
     setupTeOutput(te, htmlSupport, false, false, ignoreFilter, threadForOutput, bodyStyleString);
 }
-void UniLog::setupTeOutput(QTextEdit *te, bool htmlSupport, bool addTimeStamp, const BlockFilter &ignoreFilter, QThread *threadForOutput, const QString& bodyStyleString)
+void UniLog::setupTeOutput(QPointer<QTextEdit> te, bool htmlSupport, bool addTimeStamp, const BlockFilter &ignoreFilter, QThread *threadForOutput, const QString& bodyStyleString)
 {
     setupTeOutput(te, htmlSupport, addTimeStamp, false, ignoreFilter, threadForOutput, bodyStyleString);
 }
 
-void UniLog::setupTeOutput(QTextEdit *te, bool htmlSupport, bool addTimeStamp, bool addCategorySuffix, const BlockFilter &ignoreFilter, QThread *threadForOutput, const QString &bodyStyleString)
+void UniLog::setupTeOutput(QPointer<QTextEdit> te, bool htmlSupport, bool addTimeStamp, bool addCategorySuffix, const BlockFilter &ignoreFilter, QThread *threadForOutput, const QString &bodyStyleString)
 {
     if (!bodyStyleString.isEmpty()) FunctionTools::postToThread(threadForOutput, [=](){te->append(bodyStyleString);});
     LogReciever reciever;
@@ -125,7 +127,8 @@ void UniLog::setupTeOutput(QTextEdit *te, bool htmlSupport, bool addTimeStamp, b
                 QString out = note.msg;
                 if (addCategorySuffix) out.prepend(note.category+ "; ");
                 if (addTimeStamp) out.prepend(note.timestamp + ": ");
-//                if (htmlSupport) out = Qt::convertFromPlainText(out);
+                //                if (htmlSupport) out = Qt::convertFromPlainText(out);
+                if (!te) return;
                 te->append(out);});
     };
     QWriteLocker locker(&rwMutex);
@@ -172,9 +175,10 @@ void UniLog::setupQDebugOutput(UniLog::BlockFilter ignoreFilter)
     LogReciever reciever;
     reciever = [=](const LogTools::MsgNote& note) mutable{
         if (!ignoreFilter.isIgnored(note.category) && !ignoreFilter.isIgnored(note.type)){
+
             QMessageLogContext qtlogcontext(QT_MESSAGELOG_FILE, QT_MESSAGELOG_LINE, QT_MESSAGELOG_FUNC,
                                             note.category.isEmpty() ? "default" :
-                                                                      note.category.toStdString().c_str());
+                                                                      note.category.toUtf8());
             // QMessageLogger //same
             //                switch (note.type) {
             //                    case ()
@@ -242,5 +246,5 @@ void UniLog::showSqlWarningMsg()
     qDebug() << "UniLog:: Log table is full, please clean logs as soon as possible"
  #endif
 }
-#endif
+            #endif
 

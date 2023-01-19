@@ -4,6 +4,7 @@
 #include <QIODevice>
 #include <QDebug>
 #include <QTime>
+#include <QPointer>
 #include <QLoggingCategory>
 #include <QtSql/QSqlDatabase>
 #include "logusefull.h"
@@ -192,27 +193,27 @@ public:
                               QThread* threadForOutput = QThread::currentThread(),
                               const QString& bodyStyleString = {});
 #ifdef QT_GUI_LIB
-    void setupPteOutput(QPlainTextEdit* pte, bool htmlSupport,
+    void setupPteOutput(QPointer<QPlainTextEdit> pte, bool htmlSupport,
                         const BlockFilter& ignoreFilter = {},
                         QThread* threadForOutput = QThread::currentThread(),
                         const QString& bodyStyleString = {});
-    void setupPteOutput(QPlainTextEdit* pte, bool htmlSupport, bool addTimeStamp,
+    void setupPteOutput(QPointer<QPlainTextEdit> pte, bool htmlSupport, bool addTimeStamp,
                         const BlockFilter &ignoreFilter = {},
                         QThread* threadForOutput = QThread::currentThread(),
                         const QString& bodyStyleString = {});
-    void setupPteOutput(QPlainTextEdit* pte, bool htmlSupport, bool addTimeStamp, bool addCategorySuffix,
+    void setupPteOutput(QPointer<QPlainTextEdit> pte, bool htmlSupport, bool addTimeStamp, bool addCategorySuffix,
                         const BlockFilter &ignoreFilter = {},
                         QThread* threadForOutput = QThread::currentThread(),
                         const QString& bodyStyleString = {});
-    void setupTeOutput(QTextEdit* te, bool htmlSupport,
+    void setupTeOutput(QPointer<QTextEdit> te, bool htmlSupport,
                        const BlockFilter &ignoreFilter = {},
                        QThread* threadForOutput = QThread::currentThread(),
                        const QString &bodyStyleString = {});
-    void setupTeOutput(QTextEdit* te, bool htmlSupport, bool addTimeStamp,
+    void setupTeOutput(QPointer<QTextEdit> te, bool htmlSupport, bool addTimeStamp,
                        const BlockFilter& ignoreFilter = {},
                        QThread* threadForOutput = QThread::currentThread(),
                        const QString& bodyStyleString = {});
-    void setupTeOutput(QTextEdit* te, bool htmlSupport, bool addTimeStamp, bool addCategorySuffix,
+    void setupTeOutput(QPointer<QTextEdit> te, bool htmlSupport, bool addTimeStamp, bool addCategorySuffix,
                        const BlockFilter& ignoreFilter = {},
                        QThread* threadForOutput = QThread::currentThread(),
                        const QString& bodyStyleString = {});

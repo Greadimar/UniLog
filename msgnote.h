@@ -1,5 +1,5 @@
-#ifndef MSGNOTE_H
-#define MSGNOTE_H
+#ifndef MSGLOGNOTE_H
+#define MSGLOGNOTE_H
 #include "msgtypes.h"
 namespace LogTools {
 struct MsgNote{
@@ -13,4 +13,4 @@ struct MsgNote{
 };
 }
 
-#endif // MSGNOTE_H
+#endif // MSGLOGNOTE_H
